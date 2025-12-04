@@ -1,0 +1,73 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #fafafa;
+  color: #333;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+app-workflow-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// ============================================
+// GLOBAL: Force ngx-vflow edges to be visible
+// ============================================
+
+// Target all possible edge selectors
+svg.vflow-edges,
+svg[class*="edge"],
+.vflow-edge,
+[class*="vflow-edge"] {
+  overflow: visible !important;
+  pointer-events: all !important;
+  
+  path {
+    stroke: #3b82f6 !important;
+    stroke-width: 4px !important;
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+  
+  line {
+    stroke: #3b82f6 !important;
+    stroke-width: 4px !important;
+    opacity: 1 !important;
+  }
+}
+
+// Force all SVG paths to be visible
+vflow svg path,
+.vflow-container svg path {
+  stroke: #3b82f6 !important;
+  stroke-width: 4px !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
+
+// Markers (arrows)
+marker path,
+.vflow-edge-marker,
+[id*="arrow"] path {
+  fill: #3b82f6 !important;
+  stroke: none !important;
+}
