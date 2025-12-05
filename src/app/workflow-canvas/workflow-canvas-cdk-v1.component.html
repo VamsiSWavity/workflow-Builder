@@ -1,0 +1,176 @@
+<div class="app-layout">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-icon">✦</div>
+      <h2>Describe Your Workflow</h2>
+    </div>
+    <div class="sidebar-content">
+      <p class="sidebar-description">
+        Tell us about your flow and AI-powered now assist get it started for you
+      </p>
+      
+      <div class="form-group">
+        <label>Flow Name</label>
+        <input type="text" class="form-input" placeholder="Enter flow name">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-textarea" rows="4" placeholder="Create a Ticket based on user description..."></textarea>
+      </div>
+
+      <div class="info-box">
+        <p class="info-text">
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        </p>
+      </div>
+
+      <button class="btn-generate">
+        ⚡ Generate Flow Preview
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <span class="breadcrumb">Design Tools</span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-active">Agentic AI</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-header" (click)="testWorkflow()">Test</button>
+        <button class="btn-header btn-save">Save</button>
+        <button class="btn-header btn-publish" (click)="publishWorkflow()">Publish</button>
+      </div>
+    </header>
+
+    <!-- Canvas Header -->
+    <div class="canvas-header">
+      <h1 class="canvas-title">AI Agent Flow</h1>
+      <div class="canvas-actions">
+        <button class="icon-btn" title="Edit">✎</button>
+        <button class="icon-btn" title="Undo">↶</button>
+        <button class="icon-btn" title="Redo">↷</button>
+        <button class="icon-btn" title="Search">🔍</button>
+        <button class="icon-btn" title="Zoom">−</button>
+        <button class="icon-btn" title="Fit">⛶</button>
+        <button class="icon-btn" title="Menu">⋮</button>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-wrapper">
+      <!-- SVG Edges Layer -->
+      <svg class="edges-layer">
+        <defs>
+          <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+            <polygon points="0 0, 12 6, 0 12" fill="#3b82f6" />
+          </marker>
+        </defs>
+        <path *ngFor="let edge of edges" 
+              [attr.d]="getEdgePath(edge)" 
+              class="edge-path"
+              marker-end="url(#arrowhead)" />
+      </svg>
+
+      <!-- Nodes Layer with CDK Drag -->
+      <div class="nodes-layer">
+        <div *ngFor="let node of nodes"
+             class="workflow-node"
+             [class.trigger]="node.type === 'trigger'"
+             [class.action]="node.type === 'action'"
+             [class.selected]="isSelected(node.id)"
+             [style.left.px]="node.position.x"
+             [style.top.px]="node.position.y"
+             cdkDrag
+             (cdkDragEnded)="onNodeDragEnded($event, node.id)"
+             (click)="selectNode(node.id)">
+
+          <!-- Connection Dots -->
+          <div class="connection-dot connection-top" *ngIf="node.type !== 'trigger'"></div>
+          <div class="connection-dot connection-bottom"></div>
+          <div class="connection-dot connection-left"></div>
+          <div class="connection-dot connection-right"></div>
+
+          <!-- Toolbar -->
+          <div class="node-toolbar" *ngIf="isSelected(node.id)" (click)="$event.stopPropagation()">
+            <button class="toolbar-btn" (click)="createBranch()" title="Branch">��</button>
+            <button class="toolbar-btn" (click)="configureNode(node.id)" title="Settings">⚙</button>
+            <button class="toolbar-btn delete" (click)="deleteNode(node.id)" title="Delete">🗑</button>
+          </div>
+
+          <!-- Node Content -->
+          <div class="node-number">{{ getNodeIndex(node.id) }}</div>
+
+          <div class="node-header">
+            <div class="node-icon-badge">
+              <span class="node-icon">{{ node.icon }}</span>
+            </div>
+            <div class="node-info">
+              <span class="node-type">{{ node.type === 'trigger' ? 'TRIGGER' : 'ACTION' }}</span>
+              <h3 class="node-title">{{ node.label }}</h3>
+            </div>
+            <div class="node-status" [class.configured]="node.status === 'configured'">
+              <span class="status-dot"></span>
+              <span class="status-text">{{ node.status === 'configured' ? 'Available' : 'Incomplete' }}</span>
+            </div>
+          </div>
+
+          <div class="node-body">
+            <p class="node-description">{{ node.description }}</p>
+            <button class="node-config-btn" (click)="configureNode(node.id); $event.stopPropagation()">
+              <span class="config-icon">✦</span>
+            </button>
+          </div>
+
+          <!-- Add Button -->
+          <button class="add-btn" (click)="addNodeAfter(node.id); $event.stopPropagation()">
+            <span class="add-icon">⊕</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <h3 class="sidebar-title">Learn About Data</h3>
+    
+    <div class="data-section">
+      <div class="data-item available">
+        <span class="data-dot"></span>
+        <div>
+          <div class="data-label">Available</div>
+          <div class="data-value">All Required Tools</div>
+        </div>
+      </div>
+
+      <div class="data-item incomplete">
+        <span class="data-dot"></span>
+        <div>
+          <div class="data-label">Variable Missing</div>
+          <div class="data-value">Email Template</div>
+        </div>
+      </div>
+
+      <div class="data-item error">
+        <span class="data-dot"></span>
+        <div>
+          <div class="data-label">Requires Permission</div>
+          <div class="data-value">Ticket Create</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-box">
+      <h4 class="alert-title">Need Attention</h4>
+      <p class="alert-text">
+        Connect APIs or internal systems like your Order Management, Warehouse, or Delivery Tracking systems via our Intelligent...
+      </p>
+    </div>
+  </aside>
+</div>

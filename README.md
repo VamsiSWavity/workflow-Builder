@@ -1,6 +1,6 @@
-# Workflow Builder v1
+# Workflow Builder
 
-A Zapier-style workflow automation builder built with Angular 17 and Angular CDK.
+A Zapier-like workflow builder built with **Angular 18** and **Angular CDK**.
 
 ## Features
 
@@ -32,10 +32,41 @@ Open http://localhost:4200
 
 ## Tech Stack
 
-- Angular 17
-- @angular/cdk (Drag & Drop)
+- **Angular 18** (upgraded from 17)
+- **@angular/cdk** - Drag & Drop
 - TypeScript
-- SVG (for edges)
+- Custom SVG edge rendering
+
+## Implementation Details
+
+- ✅ Angular CDK Drag & Drop for node movement
+- ✅ Custom SVG path calculations for dynamic edges
+- ✅ Smart edge routing (connects from any side)
+- ✅ Smooth transitions with requestAnimationFrame
+- ✅ Compact nodes (240px width)
+- ✅ Small arrow markers (8x8)
+- ✅ Mind-map style connections
+
+## What's Working
+
+- ✅ Drag nodes to move them
+- ✅ Add nodes with ⊕ button
+- ✅ Delete nodes with 🗑️ button
+- ✅ Create branches with 🔀 button
+- ✅ Dynamic edge routing
+- ✅ Multi-path support
+- ✅ Node selection
+- ✅ Smooth animations
+
+## Known Limitations (To Be Added)
+
+- ❌ Drag-to-connect (need to implement port-based system)
+- ❌ Interactive connection ports
+- ❌ Edge interaction (click/delete edges)
+- ❌ Zoom/pan controls
+- ❌ Edge labels
+- ❌ Validation system
+- ❌ Undo/Redo
 
 ## Structure
 

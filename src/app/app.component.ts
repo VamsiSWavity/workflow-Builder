@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { WorkflowCanvasComponent } from './workflow-canvas/workflow-canvas.component';
+import { WorkflowCanvasNgDiagramComponent } from './workflow-canvas/workflow-canvas-ngdiagram.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [WorkflowCanvasComponent],
-  template: `<app-workflow-canvas></app-workflow-canvas>`,
+  imports: [WorkflowCanvasNgDiagramComponent],
+  template: `<app-workflow-canvas-ngdiagram></app-workflow-canvas-ngdiagram>`,
   styles: [`
     :host {
       display: block;

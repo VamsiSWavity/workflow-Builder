@@ -3,41 +3,32 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-icon">✦</div>
-      <h2>Workflow Builder</h2>
+      <h2>Describe Your Workflow</h2>
     </div>
     <div class="sidebar-content">
       <p class="sidebar-description">
-        Build your workflow using Rete.js - drag nodes, connect ports, and create complex flows.
+        Tell us about your flow and AI-powered now assist get it started for you
       </p>
       
       <div class="form-group">
         <label>Flow Name</label>
-        <input type="text" class="form-input" placeholder="My Workflow" value="AI Agent Flow">
+        <input type="text" class="form-input" placeholder="Enter flow name">
       </div>
 
-      <button class="btn-generate" (click)="addNode()">
-        ⊕ Add New Node
-      </button>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-textarea" rows="4" placeholder="Create a Ticket based on user description..."></textarea>
+      </div>
 
       <div class="info-box">
-        <h4>Features:</h4>
-        <ul>
-          <li>✅ Drag nodes to move</li>
-          <li>✅ Drag from ports to connect</li>
-          <li>✅ Zoom with mouse wheel</li>
-          <li>✅ Pan by dragging canvas</li>
-          <li>✅ Click node to select</li>
-          <li>✅ Delete/Backspace to remove</li>
-        </ul>
+        <p class="info-text">
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        </p>
       </div>
 
-      <div class="info-box" *ngIf="selectedNodeId" style="background: #dbeafe; border-color: #3b82f6;">
-        <h4>Selected Node</h4>
-        <p style="margin: 8px 0; font-size: 13px;">ID: {{selectedNodeId}}</p>
-        <button class="btn-generate" style="background: #ef4444;" (click)="deleteNode(selectedNodeId)">
-          🗑️ Delete Node
-        </button>
-      </div>
+      <button class="btn-generate">
+        ⚡ Generate Flow Preview
+      </button>
     </div>
   </aside>
 
@@ -46,9 +37,9 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="header-left">
-        <span class="breadcrumb">Rete.js</span>
+        <span class="breadcrumb">Design Tools</span>
         <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-active">Workflow Builder</span>
+        <span class="breadcrumb-active">Agentic AI</span>
       </div>
       <div class="header-right">
         <button class="btn-header" (click)="testWorkflow()">Test</button>
@@ -61,54 +52,57 @@
     <div class="canvas-header">
       <h1 class="canvas-title">AI Agent Flow</h1>
       <div class="canvas-actions">
+        <button class="icon-btn" title="Edit">✎</button>
         <button class="icon-btn" title="Undo">↶</button>
         <button class="icon-btn" title="Redo">↷</button>
+        <button class="icon-btn" title="Search">🔍</button>
         <button class="icon-btn" title="Zoom Out">−</button>
         <button class="icon-btn" title="Zoom In">+</button>
         <button class="icon-btn" title="Fit">⛶</button>
+        <button class="icon-btn" title="Menu">⋮</button>
       </div>
     </div>
 
-    <!-- Rete.js Canvas -->
+    <!-- ng-diagram Canvas -->
     <div class="canvas-wrapper">
-      <div #rete class="rete-container"></div>
+      <ng-diagram [model]="model"></ng-diagram>
     </div>
   </main>
 
   <!-- Right Sidebar -->
   <aside class="right-sidebar">
-    <h3 class="sidebar-title">Workflow Info</h3>
+    <h3 class="sidebar-title">Learn About Data</h3>
     
     <div class="data-section">
       <div class="data-item available">
         <span class="data-dot"></span>
         <div>
-          <div class="data-label">Status</div>
-          <div class="data-value">Ready</div>
+          <div class="data-label">Available</div>
+          <div class="data-value">All Required Tools</div>
         </div>
       </div>
 
-      <div class="data-item">
+      <div class="data-item incomplete">
         <span class="data-dot"></span>
         <div>
-          <div class="data-label">Nodes</div>
-          <div class="data-value">Drag to connect</div>
+          <div class="data-label">Variable Missing</div>
+          <div class="data-value">Email Template</div>
         </div>
       </div>
 
-      <div class="data-item">
+      <div class="data-item error">
         <span class="data-dot"></span>
         <div>
-          <div class="data-label">Connections</div>
-          <div class="data-value">Auto-routing</div>
+          <div class="data-label">Requires Permission</div>
+          <div class="data-value">Ticket Create</div>
         </div>
       </div>
     </div>
 
     <div class="alert-box">
-      <h4 class="alert-title">Rete.js Features</h4>
+      <h4 class="alert-title">Need Attention</h4>
       <p class="alert-text">
-        This workflow builder uses Rete.js v2 with Angular 18. All drag-to-connect, zoom, and pan features are built-in!
+        Connect APIs or internal systems like your Order Management, Warehouse, or Delivery Tracking systems via our Intelligent...
       </p>
     </div>
   </aside>
