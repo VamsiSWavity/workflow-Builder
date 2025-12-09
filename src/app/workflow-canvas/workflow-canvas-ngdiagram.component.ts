@@ -60,6 +60,12 @@ enum NodeTemplateType {
           <button (click)="selectAll()" title="Select All (Ctrl+A)">
             <span>☑️</span> Select All
           </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button (click)="saveWorkflow()" title="Save Workflow">
+            <span>💾</span> Save JSON
+          </button>
           <button class="secondary" (click)="reset()" title="Reset Diagram">
             <span>🔄</span> Reset
           </button>
@@ -218,6 +224,13 @@ export class WorkflowCanvasNgDiagramComponent {
   private modelService = inject(NgDiagramModelService);
   private selectionService = inject(NgDiagramSelectionService);
   private viewportService = inject(NgDiagramViewportService);
+  
+  // Store initial canvas state for reset
+  private initialCanvasState: {
+    nodes: Node[];
+    edges: any[];
+    viewport: { x: number; y: number; scale: number };
+  };
 
   // Computed signals for UI
   nodeCount = computed(() => this.modelService.nodes().length);
@@ -238,6 +251,17 @@ export class WorkflowCanvasNgDiagramComponent {
     'ng-diagram-custom-demo',
     this.getDefaultDiagram()
   );
+  
+  constructor() {
+    // Store initial state when component is created
+    const defaultDiagram = this.getDefaultDiagram();
+    this.initialCanvasState = {
+      nodes: this.deepClone(defaultDiagram.nodes),
+      edges: this.deepClone(defaultDiagram.edges),
+      viewport: { x: 0, y: 0, scale: 1 }
+    };
+    console.log('💾 Initial canvas state stored:', this.initialCanvasState);
+  }
 
   // Check if anything is selected
   hasSelection(): boolean {
@@ -295,8 +319,15 @@ export class WorkflowCanvasNgDiagramComponent {
 
   // Delete selected nodes and edges
   deleteSelected() {
+    console.log('🗑️ DELETE CALLED');
+    console.log('  Selection before:', this.selectionService.selection());
+    console.log('  Nodes before:', this.modelService.nodes().length);
+    
     this.selectionService.deleteSelection();
-    console.log('🗑️ Selection deleted');
+    
+    console.log('  Selection after:', this.selectionService.selection());
+    console.log('  Nodes after:', this.modelService.nodes().length);
+    console.log('  Has selection now?', this.hasSelection());
   }
 
   // Select all nodes
@@ -321,14 +352,18 @@ export class WorkflowCanvasNgDiagramComponent {
 
   // Zoom in
   zoomIn() {
-    this.viewportService.zoom(1.2);
-    console.log('🔍+ Zoom in');
+    const currentScale = this.viewportService.viewport().scale;
+    const newScale = currentScale * 1.2;
+    console.log('🔍+ Zoom in:', currentScale, '→', newScale);
+    this.viewportService.zoom(newScale);
   }
 
   // Zoom out
   zoomOut() {
-    this.viewportService.zoom(0.8);
-    console.log('🔍- Zoom out');
+    const currentScale = this.viewportService.viewport().scale;
+    const newScale = currentScale * 0.8;
+    console.log('🔍- Zoom out:', currentScale, '→', newScale);
+    this.viewportService.zoom(newScale);
   }
 
   // Zoom to fit
@@ -339,29 +374,129 @@ export class WorkflowCanvasNgDiagramComponent {
 
   // Selection changed event
   onSelectionChanged(event: any) {
-    console.log('📌 Selection changed:', {
+    console.log('📌 SELECTION CHANGED EVENT:', {
       nodes: event.selectedNodes?.length || 0,
-      edges: event.selectedEdges?.length || 0
+      edges: event.selectedEdges?.length || 0,
+      hasSelection: this.hasSelection()
     });
   }
 
   // Reset diagram
   reset() {
-    if (window.confirm('Are you sure you want to reset the diagram?')) {
+    if (window.confirm('Are you sure you want to reset the diagram? This will clear all changes and undo/redo history.')) {
       this.resetDiagramToDefault();
     }
   }
 
-  private resetDiagramToDefault() {
-    const nodeIds = this.modelService.nodes().map((node) => node.id);
-    const edgeIds = this.modelService.edges().map((edge) => edge.id);
-    this.modelService.deleteNodes(nodeIds);
-    this.modelService.deleteEdges(edgeIds);
+  // Save workflow to JSON file
+  saveWorkflow() {
+    const jsonString = this.modelAdapter.toJSON();
+    const data = JSON.parse(jsonString);
+    
+    // Add timestamp and version info
+    const exportData = {
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      ...data
+    };
 
-    const defaultDiagram = this.getDefaultDiagram();
-    this.modelService.addNodes(defaultDiagram.nodes);
-    this.modelService.addEdges(defaultDiagram.edges);
-    console.log('🔄 Diagram reset');
+    const finalJson = JSON.stringify(exportData, null, 2);
+    console.log('💾 Workflow saved:', exportData);
+
+    // Trigger download
+    const blob = new Blob([finalJson], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `workflow-${new Date().getTime()}.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private resetDiagramToDefault() {
+    console.log('🔄 RESET BUTTON CLICKED');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    // Step 1: Clear selection
+    console.log('Step 1: Clearing selection...');
+    this.selectionService.select([], []);
+    console.log('  ✅ Selection cleared');
+    
+    // Step 2: Get current state
+    const currentNodes = this.modelService.nodes();
+    const currentEdges = this.modelService.edges();
+    console.log('Step 2: Current state:', { 
+      nodes: currentNodes.length, 
+      edges: currentEdges.length 
+    });
+    
+    // Step 3: Clear undo/redo stacks FIRST (before any operations)
+    console.log('Step 3: Clearing undo/redo stacks...');
+    this.modelAdapter.reset({
+      nodes: [],
+      edges: [],
+      metadata: { viewport: { x: 0, y: 0, scale: 1 } }
+    });
+    
+    // Step 4: Delete all current content
+    console.log('Step 4: Deleting all current nodes and edges...');
+    const nodeIds = currentNodes.map(n => n.id);
+    const edgeIds = currentEdges.map(e => e.id);
+    
+    if (edgeIds.length > 0) {
+      this.modelService.deleteEdges(edgeIds);
+      console.log('  ✅ Deleted', edgeIds.length, 'edges');
+    }
+    if (nodeIds.length > 0) {
+      this.modelService.deleteNodes(nodeIds);
+      console.log('  ✅ Deleted', nodeIds.length, 'nodes');
+    }
+    
+    // Step 5: Restore initial state
+    console.log('Step 5: Restoring initial state...');
+    const initialNodes = this.deepClone(this.initialCanvasState.nodes);
+    const initialEdges = this.deepClone(this.initialCanvasState.edges);
+    console.log('  Restoring:', { 
+      nodes: initialNodes.length, 
+      edges: initialEdges.length 
+    });
+    
+    this.modelService.addNodes(initialNodes);
+    console.log('  ✅ Added', initialNodes.length, 'nodes');
+    
+    this.modelService.addEdges(initialEdges);
+    console.log('  ✅ Added', initialEdges.length, 'edges');
+    
+    // Step 6: Reset viewport
+    console.log('Step 6: Resetting viewport...');
+    setTimeout(() => {
+      this.viewportService.zoomToFit({ padding: 180 });
+      
+      // Final verification
+      const finalNodes = this.modelService.nodes();
+      const finalEdges = this.modelService.edges();
+      
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('✅ RESET COMPLETE!');
+      console.log('  Final state:', { 
+        nodes: finalNodes.length, 
+        edges: finalEdges.length 
+      });
+      console.log('  Expected:', { 
+        nodes: this.initialCanvasState.nodes.length, 
+        edges: this.initialCanvasState.edges.length 
+      });
+      console.log('  Match:', 
+        finalNodes.length === this.initialCanvasState.nodes.length &&
+        finalEdges.length === this.initialCanvasState.edges.length ? '✅ YES' : '❌ NO'
+      );
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }, 100);
+  }
+  
+  // Deep clone utility
+  private deepClone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
   }
 
   private getDefaultDiagram() {
